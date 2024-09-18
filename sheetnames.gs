@@ -1,0 +1,1 @@
+function sheetnms() {return SpreadsheetApp.getActiveSpreadsheet().getSheets().map(function(x) {return x.getName();});}
