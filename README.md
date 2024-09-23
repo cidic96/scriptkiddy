@@ -42,7 +42,7 @@ A simple yet powerful tool to convert all video files within a specified folder 
 
 ## Installation and Usage
 
-Each tool or script may have its own specific installation and usage instructions. Please refer to the individual folders for detailed README files and documentation.
+Each tool or script may have its own specific installation and usage instructions, covered in comments of respective scripts.
 
 ## Contributing
 
@@ -50,4 +50,4 @@ Contributions to improve existing tools or add new automation scripts are welcom
 
 ## License
 
-[Specify your chosen license here]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
