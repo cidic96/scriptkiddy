@@ -1,0 +1,104 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+def get_product_details(url):
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    
+    # Extraer detalles del producto
+    title = soup.find(id='productTitle').get_text(strip=True)
+    price = soup.find('span', {'class': 'a-price-whole'}).get_text(strip=True)
+    description = soup.find(id='feature-bullets').get_text(strip=True)
+    
+    image_tags = soup.find_all('img', {'class': 'a-dynamic-image'})
+    images = [img['src'] for img in image_tags]
+    
+    return {
+        'Title': title,
+        'Price': price,
+        'Description': description,
+        'Images': images
+    }
+
+def create_shopify_csv(products):
+    csv_data = []
+    
+    for product in products:
+        handle = product['Title'].lower().replace(' ', '-')
+        row = {
+            'Handle': handle,
+            'Title': product['Title'],
+            'Body (HTML)': product['Description'],
+            'Vendor': 'Amazon',
+            'Standard Product Type': '',
+            'Custom Product Type': '',
+            'Tags': '',
+            'Published': 'TRUE',
+            'Option1 Name': 'Title',
+            'Option1 Value': 'Default Title',
+            'Variant SKU': '',
+            'Variant Grams': '',
+            'Variant Inventory Tracker': '',
+            'Variant Inventory Qty': '10',
+            'Variant Inventory Policy': 'deny',
+            'Variant Fulfillment Service': 'manual',
+            'Variant Price': product['Price'],
+            'Variant Compare At Price': '',
+            'Variant Requires Shipping': 'TRUE',
+            'Variant Taxable': 'TRUE',
+            'Variant Barcode': '',
+            'Image Src': product['Images'][0] if product['Images'] else '',
+            'Image Position': '',
+            'Image Alt Text': '',
+            'Gift Card': 'FALSE',
+            'SEO Title': '',
+            'SEO Description': '',
+            'Google Shopping / Google Product Category': '',
+            'Google Shopping / Gender': '',
+            'Google Shopping / Age Group': '',
+            'Google Shopping / MPN': '',
+            'Google Shopping / AdWords Grouping': '',
+            'Google Shopping / AdWords Labels': '',
+            'Google Shopping / Condition': '',
+            'Google Shopping / Custom Product': '',
+            'Google Shopping / Custom Label 0': '',
+            'Google Shopping / Custom Label 1': '',
+            'Google Shopping / Custom Label 2': '',
+            'Google Shopping / Custom Label 3': '',
+            'Google Shopping / Custom Label 4': '',
+            'Variant Image': '',
+            'Variant Weight Unit': '',
+            'Variant Tax Code': '',
+            'Cost per item': '',
+            'Price / International': '',
+            'Compare At Price / International': '',
+            'Status': 'active'
+        }
+        
+        csv_data.append(row)
+        
+        # Agregar filas adicionales para cada imagen adicional
+        for i, image_url in enumerate(product['Images'][1:], start=2):
+            csv_data.append({
+                'Handle': handle,
+                'Image Src': image_url,
+                'Image Position': str(i),
+                'Image Alt Text': ''
+            })
+    
+    df = pd.DataFrame(csv_data)
+    df.to_csv('shopify_products.csv', index=False, encoding='utf-8')
+
+# Lista de URLs de productos de Amazon.in
+amazon_urls = [
+    'https://www.amazon.in/dp/B08N5WRWNW',
+    'https://www.amazon.in/dp/B08N5WRWNW',
+    # Añadir más URLs según sea necesario
+]
+
+products = [get_product_details(url) for url in amazon_urls]
+create_shopify_csv(products)
